@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSYNK — веб-версия | попробовать в браузере</title>
+<meta name="description" content="Веб-версия GSYNK: каталог из 79 плиток, редактор правил, бенчмарк устройства, эхо-линейка, проверка глаз, пульс камерой, генератор тона, фонарь и профиль устройства — прямо в браузере.">
+<meta name="theme-color" content="#06060d">
+<meta property="og:title" content="GSYNK — веб-версия">
+<meta property="og:description" content="Настоящие инструменты GSYNK в браузере. За полным набором — Android APK.">
+<meta property="og:image" content="assets/icon-512.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#06060d; --bg2:#0b0918; --card:#12101f; --card2:#1a1730; --border:#2a2545; --chip:#1e1b33; --chipb:#362f56;
+  --text:#f6f4ff; --sec:#c3badb; --dim:#8e86a8;
+  --violet:#8b5cf6; --violetD:#7c3aed; --cyan:#22d3ee; --green:#34d399; --pink:#f472b6; --amber:#fbbf24; --red:#f87171; --blue:#60a5fa;
+  --grad:linear-gradient(100deg,var(--violet) 0%,#ec4899 45%,var(--cyan) 100%);
+  --font:"Segoe UI","Segoe UI Variable",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2) 60%,#07100e);color:var(--text);font-family:var(--font);line-height:1.5}
+a{color:var(--cyan)}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+#aurora{position:fixed;inset:0;z-index:-1;opacity:.45}
+header{position:sticky;top:0;z-index:50;background:rgba(6,6,13,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;gap:9px;align-items:center;color:var(--text);text-decoration:none;font-weight:700;font-size:20px;letter-spacing:.05em}
+.brand img{width:34px;height:34px;border-radius:9px}
+.brand small{display:block;font-size:9.5px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.nav .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:13px;padding:10px 17px;font-size:15px;font-weight:600;text-decoration:none;color:var(--text);background:var(--chip)}
+.btn.primary{background:var(--grad)}
+.btn.web{background:linear-gradient(100deg,#047857,#10b981 55%,var(--cyan))}
+.btn.ghost{background:rgba(30,27,51,.6);border-color:var(--chipb)}
+.btn.small{padding:8px 13px;font-size:13.5px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 130px}
+.island{display:flex;align-items:center;gap:10px;margin:6px auto 18px;width:fit-content;max-width:100%;background:#000;border:1px solid #262140;border-radius:999px;padding:7px 17px 7px 11px;font-size:13.5px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
+.island .dot{width:10px;height:10px;border-radius:50%;background:#1c1c26;border:2px solid #2c2c3e}
+.island .sep{width:1px;height:15px;background:#2a2545}
+.island .dim{color:var(--dim)}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.35}}
+.layout{display:grid;grid-template-columns:208px 1fr;gap:18px;align-items:start}
+.side{position:sticky;top:86px;background:rgba(18,16,31,.8);border:1px solid var(--border);border-radius:18px;padding:10px}
+.side a{display:flex;gap:9px;align-items:center;color:var(--sec);text-decoration:none;padding:9px 11px;border-radius:11px;font-size:14.5px}
+.side a:hover{background:var(--chip)}
+.side a.on{background:var(--violetD);color:#fff}
+.view{display:none}
+.view.on{display:block;animation:in .25s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(28px,4vw,40px);font-weight:300;margin:4px 0 6px}
+h1 b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+h2{font-size:22px;margin:22px 0 8px;font-weight:600}
+.sub{color:var(--sec);margin:0 0 18px;max-width:78ch}
+.card{background:rgba(18,16,31,.85);border:1px solid var(--border);border-radius:18px;padding:18px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label.lab{display:block;font-size:13px;color:var(--dim);margin:12px 0 5px;letter-spacing:.03em}
+input[type=range]{width:100%;accent-color:var(--violet)}
+input[type=text],input[type=search],input[type=time],input[type=number],select,textarea{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:10px 12px;font-size:15px;font-family:inherit}
+textarea{width:100%;min-height:64px}
+.out{font-size:26px;font-weight:600}
+.out small{font-size:14px;color:var(--dim);font-weight:400}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid #262140;font-size:14.5px}
+.kv:last-child{border-bottom:0}
+.kv span:first-child{color:var(--dim)}
+.note{color:var(--dim);font-size:13.5px}
+.warn{color:var(--amber);font-size:13.5px}
+canvas.plot{width:100%;height:170px;background:#0a0817;border:1px solid var(--border);border-radius:14px}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.row.mt{margin-top:14px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.chip{background:var(--chip);border:1px solid var(--chipb);color:var(--sec);border-radius:999px;padding:6px 13px;font-size:13.5px}
+.chip.on{background:var(--violetD);color:#fff;border-color:var(--violetD)}
+/* плитки */
+.tools{display:flex;gap:9px;flex-wrap:wrap}
+.tools input[type=search]{flex:1;min-width:200px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.tile{border-radius:0;aspect-ratio:1;padding:9px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;position:relative;overflow:hidden;cursor:pointer;transition:transform .14s}
+.tile:hover{transform:scale(1.03);z-index:2}
+.tile.wide{grid-column:span 2;aspect-ratio:auto;min-height:104px}
+.tile.medium{grid-column:span 2;grid-row:span 2}
+.tile b{font-size:14px;line-height:1.2}
+.tile small{opacity:.88;font-size:11.5px;line-height:1.3}
+.tile .star{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.35);border:0;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;line-height:1}
+.tile .star.fav{color:var(--amber)}
+.tile .webdot{position:absolute;top:9px;left:9px;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 7px #fff}
+/* правила */
+.rule{display:flex;gap:12px;align-items:center;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:8px 0;flex-wrap:wrap}
+.rule time{font-size:22px;font-weight:600}
+.rule .days{color:var(--dim);font-size:13px}
+.switch{position:relative;width:48px;height:27px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer}
+.switch i{position:absolute;inset:0;background:#2c2750;border-radius:999px;transition:.2s;pointer-events:none}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#cfc8ee;transition:.2s}
+.switch input:checked + i{background:var(--violetD)}
+.switch input:checked + i::after{left:24px;background:#fff}
+.demo-screen{border-radius:22px;background:linear-gradient(160deg,#241549,#0d2b25);padding:20px;min-height:170px;transition:filter .3s}
+.demo-screen .dtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}
+.demo-screen .dtiles i{display:block;aspect-ratio:1;border-radius:0}
+/* глаза */
+.landolt-zone{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0}
+#landoltSvg{background:#0a0817;border:1px solid var(--border);border-radius:14px}
+.dirs{display:grid;grid-template-columns:repeat(3,58px);gap:7px;justify-content:center}
+.dirs button{height:52px;font-size:21px;background:var(--chip);border:1px solid var(--chipb);color:var(--text);border-radius:12px}
+.dirs .blank{visibility:hidden}
+#plateCanvas{width:min(320px,80vw);height:auto;border-radius:50%;border:1px solid var(--border);background:#101010}
+/* свет */
+.light-panel{height:280px;border-radius:18px;border:1px solid var(--border);background:#fff;transition:background .08s}
+.light-panel:fullscreen{border-radius:0;height:100%}
+dialog{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:18px;max-width:520px;width:calc(100% - 36px);padding:24px}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+dialog h3{margin:0 0 6px;font-size:23px}
+dialog p{color:var(--sec)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(90px);background:var(--card2);border:1px solid var(--violet);border-radius:13px;padding:12px 19px;transition:transform .3s;z-index:90;max-width:calc(100% - 36px);text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0)}
+footer{color:var(--dim);font-size:13.5px;margin-top:44px;border-top:1px solid var(--border);padding-top:18px;display:flex;gap:16px;flex-wrap:wrap}
+footer a{color:var(--sec);text-decoration:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static;display:flex;gap:4px;overflow-x:auto;padding:7px}
+  .side a{white-space:nowrap}
+  .grid2{grid-template-columns:1fr}
+}
+@media (max-width:560px){ .tiles{grid-template-columns:repeat(3,1fr)} }
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important} }
+</style>
+</head>
+<body>
+<canvas id="aurora" aria-hidden="true"></canvas>
+<header><div class="nav">
+  <a class="brand" href="index.html"><img src="assets/icon-192.png" alt="GSYNK"><span>GSYNK<small>веб-версия</small></span></a>
+  <span class="sp"></span>
+  <a class="btn ghost small" href="index.html">Сайт проекта</a>
+  <a class="btn primary small" href="https://github.com/GrapeGG-developer/GSYNKAPP/releases/download/v4.0.4/GSYNK-v4.0.4-debug.apk">Скачать APK 4.0.4</a>
+</div></header>
+
+<div class="wrap">
+  <div class="island" role="status"><span class="dot"></span><b id="clock">--:--</b><span class="sep"></span>
+    <span id="bat" class="dim">заряд —</span><span class="sep"></span><span class="pulse-dot"></span><span id="islandMsg">веб-островок жив</span></div>
+
+  <div class="layout">
+    <nav class="side" id="sideNav" aria-label="Разделы веб-версии"></nav>
+    <main id="main">
+
+      <!-- ГЛАВНАЯ -->
+      <section class="view" data-view="home">
+        <h1>начало <b>· 79 плиток</b></h1>
+        <p class="sub">Каталог веб-версии повторяет приложение: папки, поиск, сортировка и избранное (звезда на плитке).
+        Белая точка — функция работает прямо здесь. Остальные плитки честно скажут, что живут в Android.</p>
+        <div class="tools">
+          <input type="search" id="q" placeholder="Найти: пульс, эхо, nfc…" aria-label="Поиск по плиткам">
+          <select id="sort" aria-label="Сортировка">
+            <option value="hot">Сначала частые</option><option value="az">По алфавиту</option>
+            <option value="group">По папкам</option><option value="fav">Мои избранные</option>
+          </select>
+        </div>
+        <div class="chips" id="groupChips"></div>
+        <div class="tiles" id="tileGrid"></div>
+        <p class="note" id="tileCount"></p>
+      </section>
+
+      <!-- ПРАВИЛА -->
+      <section class="view" data-view="rules">
+        <h1>авто <b>яркость и громкость</b></h1>
+        <p class="sub">Редактор правил, как в GSYNK: время, дни недели, яркость % и громкость %. В Android яркость системная и будильники точные;
+        здесь правило применяется к демонстрационному экрану и пробному звуку, а список сохраняется в этом браузере. Стартовый список пуст — как в приложении.</p>
+        <div class="grid2">
+          <div class="card">
+            <h2 style="margin-top:0">Новое правило</h2>
+            <label class="lab" for="rTime">Время</label>
+            <input type="time" id="rTime" value="22:00">
+            <label class="lab">Дни недели</label>
+            <div class="chips" id="rDays"></div>
+            <label class="lab" for="rBright">Яркость: <b id="rBrightVal">30%</b></label>
+            <input type="range" id="rBright" min="1" max="100" value="30">
+            <label class="lab" for="rVol">Громкость: <b id="rVolVal">40%</b></label>
+            <input type="range" id="rVol" min="0" max="100" value="40">
+            <div class="row mt">
+              <button class="btn primary" id="rAdd" type="button">Добавить правило</button>
+              <button class="btn ghost" id="rSample" type="button">Пример: вечер 22:00</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0">Демонстрационный экран</h2>
+            <div class="demo-screen" id="demoScreen">
+              <b style="font-size:19px">Экран для проверки</b>
+              <div class="note" id="demoLabel">яркость 100% · громкость —</div>
+              <div class="dtiles" id="demoTiles"></div>
+            </div>
+            <div class="row mt">
+              <span class="note" id="nowRule">Сейчас сработало бы: правил пока нет</span>
+            </div>
+          </div>
+        </div>
+        <h2>Мои правила</h2>
+        <div id="ruleList"></div>
+        <p class="note" id="ruleEmpty">Пока пусто. Добавь первое правило слева — в приложении список тоже начинается пустым.</p>
+      </section>
+
+      <!-- СТЕНД -->
+      <section class="view" data-view="bench">
+        <h1>стенд <b>нагрузки</b></h1>
+        <p class="sub">Веб-аналог фирменного бенчмарка «как AnTuTu, только наш»: пять этапов в твоём браузере, открытая формула балла и история прогонов.
+        Балл = процессор×4 + дроби×3 + память×2 + кадры×2 + интерфейс×1 (все этапы нормированы к условным 100).</p>
+        <div class="card">
+          <div class="row">
+            <button class="btn primary" id="benchRun" type="button">Запустить замер</button>
+            <button class="btn ghost" id="loadRun" type="button">Нагрузка: 5 секунд всеми ядрами</button>
+            <button class="btn ghost" id="loadStop" type="button" disabled>Стоп</button>
+          </div>
+          <p class="note" id="benchStage" style="margin-top:12px">Готово к работе. Нагрузка реально греет процессор — как в приложении, но без термодатчика, поэтому только 5 секунд.</p>
+          <canvas class="plot" id="benchCanvas" width="900" height="340" aria-label="График этапа кадров"></canvas>
+          <div id="benchOut" style="margin-top:14px"></div>
+        </div>
+        <div class="card"><h2 style="margin-top:0">История прогонов</h2><div id="benchHist"></div>
+          <div class="row mt"><button class="btn ghost small" id="benchClear" type="button">Очистить историю</button></div></div>
+      </section>
+
+      <!-- ЭХО -->
+      <section class="view" data-view="echo">
+        <h1>эхо-<b>линейка</b></h1>
+        <p class="sub">Расстояние звуком из GSYNK 4.0.4. В Android телефон сам щёлкает и слушает отражение; здесь тот же принцип разбирает сгенерированную запись:
+        опорой служит сам щелчок, скорость звука зависит от температуры — 331,3 м/с при нуле плюс 0,606 на градус.</p>
+        <div class="grid2">
+          <div class="card">
+            <label class="lab" for="eTemp">Температура воздуха: <b id="eTempVal">20 °C</b></label>
+            <input type="range" id="eTemp" min="-10" max="40" value="20">
+            <div class="kv"><span>Скорость звука</span><b id="eSpeed">—</b></div>
+            <div class="kv"><span>Сантиметров на 1 мс задержки</span><b id="eCmMs">—</b></div>
+            <label class="lab" for="eDist">Настоящее расстояние до «стены»: <b id="eDistVal">150 см</b></label>
+            <input type="range" id="eDist" min="40" max="400" value="150">
+            <div class="row mt">
+              <button class="btn primary" id="eShoot" type="button">Выстрел (со звуком)</button>
+              <button class="btn ghost" id="eRandom" type="button">Стена случайно</button>
+            </div>
+            <p class="note" style="margin-top:12px">Ближе ~35 см эхо сливается со щелчком — приложение честно предупреждает об этом, а не рисует выдуманное число.</p>
+          </div>
+          <div class="card">
+            <canvas class="plot" id="eCanvas" width="900" height="340" aria-label="Огибающая записи: щелчок и эхо"></canvas>
+            <div id="eOut" style="margin-top:12px"><span class="note">Нажми «Выстрел» — разберём запись по тому же принципу, что и в приложении: опора на сам щелчок, эхо — после его затихания.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ГЛАЗА -->
+      <section class="view" data-view="eyes">
+        <h1>проверка <b>глаз</b></h1>
+        <p class="sub">Острота — по кольцу Ландольта: размер знака считается по правилу «знак — 5 угловых минут, прорезь — одна».
+        Сначала калибровка по банковской карте, иначе экран соврёт о миллиметрах. Диагноз ставит врач, а не сайт.</p>
+        <div class="card">
+          <h2 style="margin-top:0">Калибровка экрана</h2>
+          <p class="note">Приложи банковскую карту к рамке и подвигай ползунок, пока ширины не совпадут. Карта — ровно 85,6 мм.</p>
+          <div id="cardCal" style="height:54px;border:2px dashed var(--cyan);border-radius:10px;margin:10px 0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px">карта 85,6 мм</div>
+          <input type="range" id="calRange" min="200" max="520" value="324" aria-label="Ширина карты в пикселях">
+          <div class="kv"><span>Пикселей в миллиметре</span><b id="pxMm">—</b></div>
+          <label class="lab" for="eyeDist">Расстояние до глаз: <b id="eyeDistVal">40 см</b></label>
+          <input type="range" id="eyeDist" min="30" max="60" value="40">
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <h2 style="margin-top:0">Острота: куда смотрит прорезь?</h2>
+            <div class="landolt-zone">
+              <svg id="landoltSvg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Кольцо Ландольта"></svg>
+              <div class="dirs" id="dirs">
+                <span class="blank"></span><button type="button" data-d="270" aria-label="Вверх">↑</button><span class="blank"></span>
+                <button type="button" data-d="180" aria-label="Влево">←</button><span class="blank"></span><button type="button" data-d="0" aria-label="Вправо">→</button>
+                <span class="blank"></span><button type="button" data-d="90" aria-label="Вниз">↓</button><span class="blank"></span>
+              </div>
+            </div>
+            <div class="kv"><span>Строка сейчас</span><b id="eyeLine">—</b></div>
+            <div class="kv"><span>Ответов</span><b id="eyeCount">0 / 12</b></div>
+            <div class="kv"><span>Лучшая прочитанная строка</span><b id="eyeBest">—</b></div>
+            <div class="row mt"><button class="btn primary" id="eyeStart" type="button">Начать заново</button>
+            <span class="note" id="eyeNote">Отвечай стрелками; верно — строка мельче, неверно — крупнее.</span></div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0">Цвет: какое число в точках?</h2>
+            <div class="landolt-zone">
+              <canvas id="plateCanvas" width="520" height="520" role="img" aria-label="Цветная пластина из точек"></canvas>
+              <div class="row"><input type="number" id="plateGuess" placeholder="число" style="width:120px" aria-label="Твой ответ">
+              <button class="btn web" id="plateCheck" type="button">Проверить</button>
+              <button class="btn ghost" id="plateNew" type="button">Новая пластина</button></div>
+              <label style="font-size:14px;color:var(--sec)"><input type="checkbox" id="plateHard"> сложный режим (оттенки ближе)</label>
+            </div>
+            <div class="kv"><span>Счёт</span><b id="plateScore">0 из 0</b></div>
+            <p class="note" id="plateNote">Яркость точек внутри и снаружи цифры намеренно близкая — цифру должно быть видно по оттенку, а не по свету.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ПУЛЬС -->
+      <section class="view" data-view="pulse">
+        <h1>пульс <b>камерой</b></h1>
+        <p class="sub">Фотоплетизмография, как в приложении: кровь с каждым ударом меняет, сколько света проходит через палец.
+        Прижми палец к камере (на телефоне — к задней, рядом со вспышкой), держи неподвижно 15 секунд. Видео никуда не отправляется.</p>
+        <div class="card">
+          <canvas class="plot" id="pCanvas" width="900" height="340" aria-label="Живая волна пульса"></canvas>
+          <div class="row mt">
+            <button class="btn primary" id="pStart" type="button">Мерить камерой · 15 с</button>
+            <button class="btn ghost" id="pStop" type="button" disabled>Стоп</button>
+            <button class="btn ghost" id="pDemo" type="button">Демо-волна без камеры</button>
+          </div>
+          <div id="pOut" style="margin-top:12px"><span class="note">На компьютере прижми палец к веб-камере и подсвети фонариком телефона — волна тоже видна.</span></div>
+          <video id="pVideo" playsinline muted style="display:none"></video>
+        </div>
+      </section>
+
+      <!-- ТОН -->
+      <section class="view" data-view="tone">
+        <h1>тон и <b>мелодии</b></h1>
+        <p class="sub">Камертон, свип и музыка из частот — родня лабораторных экранов GSYNK. Держишь кнопку — играет.</p>
+        <div class="grid2">
+          <div class="card">
+            <label class="lab" for="tFreq">Частота: <b id="tFreqVal">440 Гц</b></label>
+            <input type="range" id="tFreq" min="0" max="1000" value="430">
+            <label class="lab" for="tVol">Громкость: <b id="tVolVal">35%</b></label>
+            <input type="range" id="tVol" min="0" max="100" value="35">
+            <label class="lab" for="tWave">Форма волны</label>
+            <select id="tWave"><option value="sine">синус</option><option value="triangle">треугольник</option><option value="square">квадрат (тише!)</option><option value="sawtooth">пила</option></select>
+            <div class="row mt">
+              <button class="btn primary" id="tHold" type="button">Держи — играет</button>
+              <button class="btn ghost" id="t440" type="button">Ля · 440 Гц</button>
+              <button class="btn ghost" id="tSweep" type="button">Свип 60 Гц → 12 кГц</button>
+            </div>
+            <p class="warn" style="margin-top:12px">Не включай громко высокие частоты в наушниках.</p>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0">Ноты и мелодия</h2>
+            <div class="row" id="noteBtns"></div>
+            <div class="row mt"><button class="btn web" id="tMelody" type="button">Сыграть мелодию из частот</button>
+            <button class="btn ghost" id="tStopAll" type="button">Тишина</button></div>
+            <p class="note" style="margin-top:12px" id="tNoteInfo">Частота ноты считается от ля 440 Гц: каждый полутон — умножение на корень 12-й степени из двух.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- СВЕТ -->
+      <section class="view" data-view="light">
+        <h1>фонарь, строб и <b>морзянка</b></h1>
+        <p class="sub">Экран как источник света: фонарь на весь экран, стробоскоп и морзянка вспышками (на телефоне — ещё и вибрацией).</p>
+        <p class="warn">Стробоскоп мигает. Если яркие вспышки тебе неприятны или вредны — не включай этот раздел.</p>
+        <div class="light-panel" id="lightPanel" aria-label="Панель фонаря"></div>
+        <div class="grid2">
+          <div class="card">
+            <label class="lab">Цвет света</label>
+            <div class="row" id="lightColors"></div>
+            <label class="lab" for="lBright">Яркость: <b id="lBrightVal">100%</b></label>
+            <input type="range" id="lBright" min="5" max="100" value="100">
+            <div class="row mt"><button class="btn primary" id="lFull" type="button">Фонарь на весь экран</button></div>
+            <label class="lab" for="lHz">Строб: <b id="lHzVal">4 Гц</b></label>
+            <input type="range" id="lHz" min="1" max="20" value="4">
+            <div class="row"><button class="btn ghost" id="lStrobe" type="button">Включить строб</button></div>
+          </div>
+          <div class="card">
+            <label class="lab" for="morseText">Текст для морзянки (латиница и цифры)</label>
+            <input type="text" id="morseText" value="SOS GSYNK" style="width:100%">
+            <div class="kv" style="margin-top:10px"><span>Код</span><b id="morseCode" style="font-family:ui-monospace,monospace;font-size:13px">—</b></div>
+            <div class="row mt"><button class="btn web" id="morsePlay" type="button">Мигать и вибрировать</button>
+            <button class="btn ghost" id="morseStop" type="button">Стоп</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- УСТРОЙСТВО -->
+      <section class="view" data-view="device">
+        <h1>устройство <b>глазами браузера</b></h1>
+        <p class="sub">Всё, что браузер честно разрешает узнать. В Android-версии лаборатория железа видит в разы больше: частоты ядер, ток батареи, датчики живьём.</p>
+        <div class="grid2">
+          <div class="card"><h2 style="margin-top:0">Профиль</h2><div id="devInfo"></div>
+            <div class="row mt"><button class="btn ghost" id="compassBtn" type="button">Включить компас (датчик поворота)</button></div>
+            <div class="kv" style="margin-top:10px"><span>Курс устройства</span><b id="compassOut">—</b></div></div>
+          <div>
+            <div class="card" style="margin-top:0"><h2 style="margin-top:0">Кодёр: Base64</h2>
+              <textarea id="coderIn" placeholder="Текст сюда…">GSYNK рядом</textarea>
+              <div class="row mt"><button class="btn web small" id="encBtn" type="button">Закодировать</button>
+              <button class="btn ghost small" id="decBtn" type="button">Раскодировать</button></div>
+              <p class="note" id="coderOut" style="word-break:break-all;margin-top:10px">—</p></div>
+            <div class="card"><h2 style="margin-top:0">Генератор пароля</h2>
+              <label class="lab" for="passLen">Длина: <b id="passLenVal">16</b></label>
+              <input type="range" id="passLen" min="8" max="40" value="16">
+              <div class="row mt"><button class="btn web small" id="passBtn" type="button">Сгенерировать</button>
+              <code id="passOut" style="word-break:break-all">—</code></div>
+              <p class="note" style="margin-top:8px">Случайность — от crypto.getRandomValues браузера.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ДЕНЬ -->
+      <section class="view" data-view="daily">
+        <h1>каждый <b>день</b></h1>
+        <p class="sub">Фирменный набор дня GSYNK: функция дня выбирается из даты — у всех в один день одинаковая. Серия посещений считается в этом браузере.</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="kv"><span>Серия посещений</span><b id="streak">—</b></div>
+            <div class="kv"><span>Функция дня</span><b id="dailyFn">—</b></div>
+            <div class="kv"><span>Факт дня о GSYNK</span></div>
+            <p id="dailyFact" style="color:var(--sec);margin:8px 0 0">—</p>
+            <div class="row mt"><a class="btn web" id="dailyOpen" href="#/home">Открыть функцию дня</a>
+            <button class="btn ghost" id="roulette" type="button">Рулетка случайной функции</button></div>
+            <p class="note" id="rouletteOut" style="margin-top:10px"></p>
+          </div>
+          <div class="card" style="text-align:center">
+            <img src="assets/icon-192.png" alt="Иконка GSYNK" id="eggIcon" style="width:110px;height:110px;border-radius:24px;cursor:pointer">
+            <p class="note">Пасхалки в приложении открываются за настоящие действия. Здесь попробуй нажать на иконку пять раз.</p>
+            <div class="kv"><span>Пасхалок найдено на сайте</span><b id="eggCount">0</b></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <span>GSYNK веб-версия · полный набор — в Android APK</span>
+    <a href="index.html">Сайт проекта</a>
+    <a href="index.html#download">Скачать APK</a>
+    <a href="https://github.com/GrapeGG-developer/GSYNKAPP/issues/1" rel="noopener">Связь с агентом</a>
+    <span style="margin-left:auto">логотип в углу — <b>GrapeScript</b> (.lottie)</span>
+  </footer>
+</div>
+
+<dialog id="dlg"><h3 id="dlgTitle">—</h3><p id="dlgSub">—</p><p id="dlgText" style="color:var(--dim);font-size:14px">—</p>
+  <div class="row"><a class="btn primary small" href="https://github.com/GrapeGG-developer/GSYNKAPP/releases/download/v4.0.4/GSYNK-v4.0.4-debug.apk">Скачать APK</a>
+  <button class="btn ghost small" id="dlgClose" type="button">Понятно</button></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<!-- GrapeScript: логотип .lottie в правом нижнем углу -->
+<div id="grapescript-badge" data-lottie="assets/grapescript.lottie" role="img" aria-label="GrapeScript" title="GrapeScript">
+  <div class="gs-lottie" aria-hidden="true"></div>
+  <img class="gs-fallback" src="assets/grapescript.png" alt="GrapeScript" width="1080" height="360">
+  <span class="gs-caption">powered by GrapeScript</span>
+</div>
+<script src="assets/js/lottie.min.js"></script>
+<script src="assets/js/fflate.min.js"></script>
+<script src="assets/js/grapescript-badge.js"></script>
+
+<script>
+'use strict';
+var TILES = [
+ {
+  "id": "nfc",
+  "title": "grape link",
+  "sub": "NFC: обмен, связь, игра",
+  "group": "CONNECT",
+  "size": "WIDE",
+  "route": "panel:nfc",
+  "hot": 100
+ },
+ {
+  "id": "nearby",
+  "title": "gsynk рядом",
+  "sub": "Bluetooth и Wi-Fi Direct",
+  "group": "CONNECT",
+  "size": "MEDIUM",
+  "route": "tool:nearby",
+  "hot": 96
+ },
+ {
+  "id": "ble",
+  "title": "ble-радар",
+  "sub": "кто рядом по эфиру",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "lab:ble",
+  "hot": 70
+ },
+ {
+  "id": "filelink",
+  "title": "передача файлов",
+  "sub": "по Wi-Fi, без проводов",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "tool:nearby",
+  "hot": 68
+ },
+ {
+  "id": "wifiscan",
+  "title": "каналы wi-fi",
+  "sub": "загрузка эфира",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "lab:wifi",
+  "hot": 58
+ },
+ {
+  "id": "netinfo",
+  "title": "подсети",
+  "sub": "калькулятор адресов",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "tool:subnet",
+  "hot": 40
+ },
+ {
+  "id": "coop",
+  "title": "игра вдвоём",
+  "sub": "grape link по Wi-Fi",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "panel:coop",
+  "hot": 62
+ },
+ {
+  "id": "nfcmark",
+  "title": "метка-визитка",
+  "sub": "записать свою",
+  "group": "CONNECT",
+  "size": "SMALL",
+  "route": "lab:nfcwrite",
+  "hot": 45
+ },
+ {
+  "id": "island",
+  "title": "остров 2.0",
+  "sub": "под камерой, живьём",
+  "group": "SCREEN",
+  "size": "MEDIUM",
+  "route": "page:island",
+  "hot": 92
+ },
+ {
+  "id": "effects",
+  "title": "эффекты",
+  "sub": "стёкла, лучи, размытие",
+  "group": "SCREEN",
+  "size": "MEDIUM",
+  "route": "page:effects",
+  "hot": 88
+ },
+ {
+  "id": "radius",
+  "title": "скругления",
+  "sub": "у каждого элемента своё",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "page:radius",
+  "hot": 64
+ },
+ {
+  "id": "tweaks",
+  "title": "кастомизация",
+  "sub": "акцент, отклик, скорость",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "panel:settings",
+  "hot": 60
+ },
+ {
+  "id": "screensaver",
+  "title": "скринсейвер",
+  "sub": "полка с часами",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "flag:screensaver",
+  "hot": 42
+ },
+ {
+  "id": "screen",
+  "title": "проверка экрана",
+  "sub": "AMOLED, ШИМ, мультитач",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "lab:screen",
+  "hot": 48
+ },
+ {
+  "id": "pwm",
+  "title": "шим-микроскоп",
+  "sub": "замер мерцания камерой",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "lab:pwm",
+  "hot": 44
+ },
+ {
+  "id": "latency",
+  "title": "латентность экрана",
+  "sub": "касание → свет",
+  "group": "SCREEN",
+  "size": "SMALL",
+  "route": "lab:latency",
+  "hot": 30
+ },
+ {
+  "id": "echo",
+  "title": "эхо-линейка",
+  "sub": "расстояние звуком",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:echo",
+  "hot": 79
+ },
+ {
+  "id": "eyes",
+  "title": "проверка глаз",
+  "sub": "острота и цвет",
+  "group": "SCREEN",
+  "size": "MEDIUM",
+  "route": "page:eyes",
+  "hot": 63
+ },
+ {
+  "id": "pulse",
+  "title": "пульс камерой",
+  "sub": "удары сердца по свету",
+  "group": "HARDWARE",
+  "size": "WIDE",
+  "route": "page:pulse",
+  "hot": 85
+ },
+ {
+  "id": "folders",
+  "title": "папки",
+  "sub": "все функции по категориям",
+  "group": "SYSTEM",
+  "size": "WIDE",
+  "route": "page:folders",
+  "hot": 99
+ },
+ {
+  "id": "cpu",
+  "title": "частоты ядер",
+  "sub": "режимы и ступени",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:cpu",
+  "hot": 86
+ },
+ {
+  "id": "battery",
+  "title": "питание изнутри",
+  "sub": "ток, ватты, ресурс",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:battery",
+  "hot": 84
+ },
+ {
+  "id": "panel",
+  "title": "панель и наклон",
+  "sub": "экран и уровень",
+  "group": "SCREEN",
+  "size": "MEDIUM",
+  "route": "page:display",
+  "hot": 74
+ },
+ {
+  "id": "radio",
+  "title": "радио-тракт",
+  "sub": "модем, сеть, wi-fi",
+  "group": "CONNECT",
+  "size": "MEDIUM",
+  "route": "page:radio",
+  "hot": 76
+ },
+ {
+  "id": "flash",
+  "title": "светодиод вспышки",
+  "sub": "уровни и накал",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:camera",
+  "hot": 80
+ },
+ {
+  "id": "motor",
+  "title": "мотор и резонанс",
+  "sub": "частота и поле",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:motor",
+  "hot": 78
+ },
+ {
+  "id": "deepmem",
+  "title": "память и планировщик",
+  "sub": "давление и накопитель",
+  "group": "LOAD",
+  "size": "MEDIUM",
+  "route": "page:memory",
+  "hot": 70
+ },
+ {
+  "id": "sensorsdeep",
+  "title": "датчики изнутри",
+  "sub": "что есть и что закрыто",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "page:sensors",
+  "hot": 72
+ },
+ {
+  "id": "lab",
+  "title": "лаборатория",
+  "sub": "всё железо телефона",
+  "group": "HARDWARE",
+  "size": "WIDE",
+  "route": "tool:lab",
+  "hot": 90
+ },
+ {
+  "id": "sensors",
+  "title": "датчики",
+  "sub": "все, что есть живьём",
+  "group": "HARDWARE",
+  "size": "MEDIUM",
+  "route": "lab:sensors",
+  "hot": 80
+ },
+ {
+  "id": "coils",
+  "title": "катушки",
+  "sub": "вибромотор и звук",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:coils",
+  "hot": 66
+ },
+ {
+  "id": "induction",
+  "title": "индукция",
+  "sub": "металл, поля, зарядка",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:metal",
+  "hot": 55
+ },
+ {
+  "id": "compass",
+  "title": "компас",
+  "sub": "азимут и стороны света",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:compass",
+  "hot": 52
+ },
+ {
+  "id": "baro",
+  "title": "барометр",
+  "sub": "давление и высота",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:baro",
+  "hot": 38
+ },
+ {
+  "id": "charge",
+  "title": "заряд и ток",
+  "sub": "вольты, амперы, ватты",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:charge",
+  "hot": 58
+ },
+ {
+  "id": "thermal",
+  "title": "термощуп",
+  "sub": "тепловые зоны",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:thermal",
+  "hot": 46
+ },
+ {
+  "id": "oscope",
+  "title": "осциллограф",
+  "sub": "звук на графике",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:oscope",
+  "hot": 50
+ },
+ {
+  "id": "sweep",
+  "title": "свип-тон",
+  "sub": "частота от и до",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:sweep",
+  "hot": 40
+ },
+ {
+  "id": "shaker",
+  "title": "акселерограф",
+  "sub": "тряска на графике",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:shake",
+  "hot": 44
+ },
+ {
+  "id": "prox",
+  "title": "приближение",
+  "sub": "датчик у динамика",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:prox",
+  "hot": 36
+ },
+ {
+  "id": "light",
+  "title": "люксметр",
+  "sub": "свет в комнате",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:light",
+  "hot": 34
+ },
+ {
+  "id": "haptic",
+  "title": "вибро-код",
+  "sub": "азбука мотором",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:haptic",
+  "hot": 42
+ },
+ {
+  "id": "strobe",
+  "title": "стробоскоп",
+  "sub": "мигание экраном",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:strobe",
+  "hot": 54
+ },
+ {
+  "id": "ir",
+  "title": "ик-пульт",
+  "sub": "телевизор одним касанием",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:ir",
+  "hot": 47
+ },
+ {
+  "id": "codes",
+  "title": "инженерные коды",
+  "sub": "тестовые меню",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:codes",
+  "hot": 33
+ },
+ {
+  "id": "screentest",
+  "title": "тест фонарика",
+  "sub": "вспышка в такт",
+  "group": "HARDWARE",
+  "size": "SMALL",
+  "route": "lab:torch",
+  "hot": 32
+ },
+ {
+  "id": "bench",
+  "title": "бенчмарк",
+  "sub": "как AnTuTu, только наш",
+  "group": "LOAD",
+  "size": "WIDE",
+  "route": "page:bench",
+  "hot": 86
+ },
+ {
+  "id": "turbo",
+  "title": "нагрузка",
+  "sub": "все ядра сразу",
+  "group": "LOAD",
+  "size": "MEDIUM",
+  "route": "flag:turbo",
+  "hot": 74
+ },
+ {
+  "id": "gpu",
+  "title": "ускоритель",
+  "sub": "кадры шейдера",
+  "group": "LOAD",
+  "size": "SMALL",
+  "route": "flag:turbo",
+  "hot": 56
+ },
+ {
+  "id": "chronicle",
+  "title": "хроника",
+  "sub": "что было за день",
+  "group": "LOAD",
+  "size": "SMALL",
+  "route": "flag:chronicle",
+  "hot": 48
+ },
+ {
+  "id": "sysinfo",
+  "title": "дашборд",
+  "sub": "живое состояние",
+  "group": "LOAD",
+  "size": "SMALL",
+  "route": "tool:sysinfo",
+  "hot": 64
+ },
+ {
+  "id": "chronicle2",
+  "title": "статистика нагрузки",
+  "sub": "график за час",
+  "group": "LOAD",
+  "size": "SMALL",
+  "route": "flag:chronicle",
+  "hot": 38
+ },
+ {
+  "id": "ai",
+  "title": "умный помощник",
+  "sub": "настоящие сети и офлайн",
+  "group": "AI",
+  "size": "MEDIUM",
+  "route": "page:ai",
+  "hot": 76
+ },
+ {
+  "id": "chat",
+  "title": "локальный ии",
+  "sub": "чат без интернета",
+  "group": "AI",
+  "size": "SMALL",
+  "route": "flag:chat",
+  "hot": 60
+ },
+ {
+  "id": "daily",
+  "title": "каждый день",
+  "sub": "новое при открытии",
+  "group": "AI",
+  "size": "MEDIUM",
+  "route": "page:everyday",
+  "hot": 82
+ },
+ {
+  "id": "surprise",
+  "title": "рулетка",
+  "sub": "случайная функция",
+  "group": "AI",
+  "size": "SMALL",
+  "route": "page:surprise",
+  "hot": 66
+ },
+ {
+  "id": "easter",
+  "title": "пасхалки",
+  "sub": "секреты внутри",
+  "group": "AI",
+  "size": "SMALL",
+  "route": "page:easter",
+  "hot": 58
+ },
+ {
+  "id": "rules",
+  "title": "автопилот",
+  "sub": "правила по времени",
+  "group": "SYSTEM",
+  "size": "MEDIUM",
+  "route": "panel:tools",
+  "hot": 88
+ },
+ {
+  "id": "permissions",
+  "title": "разрешения",
+  "sub": "всё, что нужно приложению",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "panel:settings",
+  "hot": 70
+ },
+ {
+  "id": "update",
+  "title": "обновление",
+  "sub": "приходит само",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "flag:update",
+  "hot": 72
+ },
+ {
+  "id": "diag",
+  "title": "диагностика",
+  "sub": "отчёты и журнал",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "flag:diagnostics",
+  "hot": 50
+ },
+ {
+  "id": "agent",
+  "title": "связь с агентом",
+  "sub": "переписка через GitHub",
+  "group": "SYSTEM",
+  "size": "WIDE",
+  "route": "page:agent",
+  "hot": 95
+ },
+ {
+  "id": "report",
+  "title": "собрать отчёт",
+  "sub": "состояние телефона",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:report",
+  "hot": 46
+ },
+ {
+  "id": "syssound",
+  "title": "звук",
+  "sub": "системный экран",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:sound",
+  "hot": 30
+ },
+ {
+  "id": "sysbattery",
+  "title": "батарея",
+  "sub": "системный экран",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:battery",
+  "hot": 30
+ },
+ {
+  "id": "syswifi",
+  "title": "wi-fi",
+  "sub": "системный экран",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:wifi",
+  "hot": 30
+ },
+ {
+  "id": "sysbt",
+  "title": "bluetooth",
+  "sub": "системный экран",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:bluetooth",
+  "hot": 28
+ },
+ {
+  "id": "sysapps",
+  "title": "приложения",
+  "sub": "системный экран",
+  "group": "SYSTEM",
+  "size": "SMALL",
+  "route": "sys:apps",
+  "hot": 24
+ },
+ {
+  "id": "games",
+  "title": "игры",
+  "sub": "мини-игры и дуэли",
+  "group": "FUN",
+  "size": "MEDIUM",
+  "route": "panel:games",
+  "hot": 68
+ },
+ {
+  "id": "rogue",
+  "title": "gtboi",
+  "sub": "подземелье вдвоём",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "panel:rogue",
+  "hot": 64
+ },
+ {
+  "id": "music",
+  "title": "композитор",
+  "sub": "музыка из частот",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "lab:music",
+  "hot": 56
+ },
+ {
+  "id": "tone",
+  "title": "камертон",
+  "sub": "держу — играет",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "lab:tone",
+  "hot": 40
+ },
+ {
+  "id": "torchlab",
+  "title": "фонарик-строб",
+  "sub": "вспышка в такт",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "lab:torch",
+  "hot": 44
+ },
+ {
+  "id": "metal",
+  "title": "металл",
+  "sub": "магнитометр",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:metal",
+  "hot": 42
+ },
+ {
+  "id": "level",
+  "title": "уровень",
+  "sub": "наклон в градусах",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:level",
+  "hot": 46
+ },
+ {
+  "id": "noise",
+  "title": "шумомер",
+  "sub": "уровень в дБ",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:sound",
+  "hot": 44
+ },
+ {
+  "id": "morse",
+  "title": "морзянка",
+  "sub": "мигание фонариком",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:morse",
+  "hot": 34
+ },
+ {
+  "id": "password",
+  "title": "пароль и qr",
+  "sub": "генератор",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:password",
+  "hot": 36
+ },
+ {
+  "id": "coder",
+  "title": "кодер",
+  "sub": "base64, url, hex",
+  "group": "FUN",
+  "size": "SMALL",
+  "route": "tool:coder",
+  "hot": 32
+ }
+];
+var GROUPS = {ALL:'все папки', CONNECT:'связь', SCREEN:'экран', HARDWARE:'железо', LOAD:'нагрузка', AI:'умное', SYSTEM:'система', FUN:'забава'};
+var WEB = {folders:'home', bench:'bench', turbo:'bench', gpu:'bench', echo:'echo', eyes:'eyes', pulse:'pulse',
+  rules:'rules', daily:'daily', surprise:'daily', easter:'daily', tone:'tone', music:'tone', sweep:'tone', sysinfo:'device',
+  strobe:'light', morse:'light', torchlab:'light', island:'rules', screensaver:'light', coder:'device', password:'device', compass:'device'};
+var TILE_COLORS = [
+  'linear-gradient(135deg,#4c1d95,#7c3aed,#a855f7)','linear-gradient(135deg,#0e7490,#22d3ee,#67e8f9)',
+  'linear-gradient(135deg,#065f46,#10b981,#34d399)','linear-gradient(135deg,#92400e,#f59e0b,#fbbf24)',
+  'linear-gradient(135deg,#9d174d,#ec4899,#f472b6)','linear-gradient(135deg,#1e3a8a,#3b82f6,#60a5fa)',
+  'linear-gradient(135deg,#7f1d1d,#dc2626,#f87171)','linear-gradient(135deg,#16132a,#2c2350)'];
+function colorOf(t){ var s=0; for(var i=0;i<t.id.length;i++) s+=t.id.charCodeAt(i); return TILE_COLORS[s%TILE_COLORS.length]; }
+function $(id){ return document.getElementById(id); }
+function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem('gsynk.web.'+k) || 'null'); localStorage.setItem('gsynk.web.'+k, JSON.stringify(v)); } catch(e){ return null; } }
+var toastT = null;
+function toast(t){ var el=$('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('on'); }, 3000); }
+
+/* фон-аврора */
+(function(){ var c=$('aurora'),x=c.getContext('2d'),w,h,t=0,reduced=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches); if(!x) return;
+  function rs(){ w=c.width=innerWidth; h=c.height=innerHeight; } addEventListener('resize',rs); rs();
+  var ORBS=[[.15,.18,280,'124,58,237'],[.85,.2,240,'34,211,238'],[.7,.85,300,'16,185,129']];
+  (function draw(){ x.clearRect(0,0,w,h); t+=.004;
+    ORBS.forEach(function(o,i){ var px=(o[0]+Math.sin(t*(i+1))*.04)*w, py=(o[1]+Math.cos(t*(i+1)*.8)*.04)*h;
+      var g=x.createRadialGradient(px,py,0,px,py,o[2]); g.addColorStop(0,'rgba('+o[3]+',.16)'); g.addColorStop(1,'rgba('+o[3]+',0)');
+      x.fillStyle=g; x.beginPath(); x.arc(px,py,o[2],0,7); x.fill(); });
+    if(!reduced) requestAnimationFrame(draw); })();
+})();
+
+/* островок */
+var MSG=['веб-островок жив','правило 22:00 · яркость 30%','NFC — только в APK','функция дня уже ждёт']; var mi=0;
+function tick(){ $('clock').textContent = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }
+setInterval(tick,1000); tick();
+setInterval(function(){ mi=(mi+1)%MSG.length; $('islandMsg').textContent=MSG[mi]; },4200);
+if (navigator.getBattery) navigator.getBattery().then(function(b){ function u(){ $('bat').textContent='заряд '+Math.round(b.level*100)+'%'; } b.addEventListener('levelchange',u); u(); }).catch(function(){});
+
+/* навигация */
+var NAV = [['home','Главная · плитки'],['rules','Правила'],['bench','Стенд'],['echo','Эхо-линейка'],['eyes','Проверка глаз'],['pulse','Пульс камерой'],['tone','Тон и мелодии'],['light','Свет и морзянка'],['device','Устройство'],['daily','Каждый день']];
+$('sideNav').innerHTML = NAV.map(function(n){ return '<a href="#/'+n[0]+'" data-v="'+n[0]+'">'+n[1]+'</a>'; }).join('');
+var stoppers = [];
+function route(){
+  stoppers.forEach(function(f){ try{ f(); }catch(e){} }); stoppers = [];
+  var v = (location.hash.replace('#/','') || 'home').split('?')[0];
+  if (!document.querySelector('[data-view="'+v+'"]')) v = 'home';
+  document.querySelectorAll('.view').forEach(function(s){ s.classList.toggle('on', s.dataset.view === v); });
+  document.querySelectorAll('#sideNav a').forEach(function(a){ a.classList.toggle('on', a.dataset.v === v); });
+  window.scrollTo({top:0});
+}
+addEventListener('hashchange', route);
+
+/* ---------- ГЛАВНАЯ: каталог ---------- */
+var favs = store('favs') || {}; var curGroup = 'ALL';
+$('groupChips').innerHTML = Object.keys(GROUPS).map(function(g){ return '<button type="button" class="chip'+(g==='ALL'?' on':'')+'" data-g="'+g+'">'+GROUPS[g]+'</button>'; }).join('');
+$('groupChips').addEventListener('click', function(e){ var b=e.target.closest('.chip'); if(!b) return; curGroup=b.dataset.g;
+  document.querySelectorAll('#groupChips .chip').forEach(function(c){ c.classList.toggle('on', c===b); }); renderTiles(); });
+function renderTiles(){
+  var q=$('q').value.trim().toLowerCase(), sort=$('sort').value;
+  var list=TILES.filter(function(t){ if(curGroup!=='ALL'&&t.group!==curGroup) return false;
+    if(sort==='fav'&&!favs[t.id]) return false;
+    if(q&&(t.title+' '+t.sub+' '+t.id).toLowerCase().indexOf(q)<0) return false; return true; });
+  if(sort==='az') list.sort(function(a,b){ return a.title.localeCompare(b.title,'ru'); });
+  else if(sort==='group') list.sort(function(a,b){ return a.group===b.group ? b.hot-a.hot : a.group.localeCompare(b.group); });
+  else list.sort(function(a,b){ return b.hot-a.hot; });
+  $('tileGrid').innerHTML = list.map(function(t){
+    var cls=t.size==='WIDE'?'wide':t.size==='MEDIUM'?'medium':'';
+    return '<div class="tile '+cls+'" data-id="'+t.id+'" style="background:'+colorOf(t)+'" role="button" tabindex="0" aria-label="'+t.title+'">'+
+      (WEB[t.id]?'<span class="webdot"></span>':'')+
+      '<button type="button" class="star'+(favs[t.id]?' fav':'')+'" data-star="'+t.id+'" aria-label="В избранное">★</button>'+
+      '<b>'+t.title+'</b><small>'+t.sub+'</small></div>';
+  }).join('') || '<p class="note">Ничего не нашлось.</p>';
+  $('tileCount').textContent = 'Показано '+list.length+' из '+TILES.length+' плиток · папка: '+GROUPS[curGroup];
+}
+$('tileGrid').addEventListener('click', function(e){
+  var st=e.target.closest('[data-star]');
+  if(st){ var id=st.dataset.star; favs[id]=!favs[id]; if(!favs[id]) delete favs[id]; store('favs',favs); renderTiles(); toast(favs[id]?'Добавлено в избранное':'Убрано из избранного'); return; }
+  var el=e.target.closest('.tile'); if(!el) return; openTile(el.dataset.id);
+});
+$('q').addEventListener('input', renderTiles); $('sort').addEventListener('change', renderTiles);
+var dlg=$('dlg');
+function openTile(id){
+  if(WEB[id]){ location.hash='#/'+WEB[id]; return; }
+  var t=null; TILES.forEach(function(x){ if(x.id===id) t=x; }); if(!t) return;
+  $('dlgTitle').textContent=t.title; $('dlgSub').textContent=t.sub+' · папка «'+GROUPS[t.group]+'»';
+  $('dlgText').textContent='Эта функция работает в Android-приложении: ей нужен доступ к телефону, которого у браузера нет (NFC, датчики, системные настройки и тому подобное). Скачай APK — и плитка оживёт полностью.';
+  if(typeof dlg.showModal==='function') dlg.showModal();
+}
+$('dlgClose').addEventListener('click', function(){ dlg.close(); });
+renderTiles();
+
+/* ---------- ПРАВИЛА ---------- */
+var DAYS=['пн','вт','ср','чт','пт','сб','вс']; var selDays={0:1,1:1,2:1,3:1,4:1};
+$('rDays').innerHTML = DAYS.map(function(d,i){ return '<button type="button" class="chip'+(selDays[i]?' on':'')+'" data-d="'+i+'">'+d+'</button>'; }).join('');
+$('rDays').addEventListener('click', function(e){ var b=e.target.closest('.chip'); if(!b) return; var i=b.dataset.d;
+  if(selDays[i]) delete selDays[i]; else selDays[i]=1; b.classList.toggle('on'); });
+$('demoTiles').innerHTML = TILE_COLORS.concat(TILE_COLORS).slice(0,8).map(function(c){ return '<i style="background:'+c+'"></i>'; }).join('');
+var rules = store('rules') || [];
+function fmtDays(r){ var a=r.days.slice().sort(); return a.length===7?'каждый день':a.map(function(i){ return DAYS[i]; }).join(' '); }
+function renderRules(){
+  $('ruleEmpty').style.display = rules.length? 'none':'block';
+  $('ruleList').innerHTML = rules.map(function(r,i){
+    return '<div class="rule"><time>'+r.time+'</time><div><div>яркость '+r.bright+'% · громкость '+r.vol+'%</div><div class="days">'+fmtDays(r)+'</div></div>'+
+    '<span style="flex:1"></span>'+
+    '<button class="btn web small" data-apply="'+i+'" type="button">Применить</button>'+
+    '<label class="switch"><input type="checkbox" data-on="'+i+'" '+(r.on?'checked':'')+'><i></i></label>'+
+    '<button class="btn ghost small" data-del="'+i+'" type="button">Удалить</button></div>';
+  }).join('');
+  store('rules', rules); nowRule();
+}
+function applyRule(r){
+  $('demoScreen').style.filter='brightness('+(0.25 + r.bright/100*0.75)+')';
+  $('demoLabel').textContent='яркость '+r.bright+'% · громкость '+r.vol+'% · применено правило '+r.time;
+  beep(660, .25, r.vol/100);
+  toast('Правило '+r.time+' применено к демо-экрану');
+}
+function nowRule(){
+  var now=new Date(); var wd=(now.getDay()+6)%7; var cur=now.getHours()*60+now.getMinutes(); var best=null,bt=-1;
+  rules.forEach(function(r){ if(!r.on||r.days.indexOf(wd)<0) return; var p=r.time.split(':'); var m=(+p[0])*60+(+p[1]); if(m<=cur&&m>bt){ bt=m; best=r; } });
+  $('nowRule').textContent = best ? 'Сейчас сработало бы: '+best.time+' · яркость '+best.bright+'% · громкость '+best.vol+'% (последнее правило на сегодня — как после перезагрузки в приложении)'
+                                  : 'Сейчас сработало бы: ничего — включённых правил на сегодня пока нет';
+}
+$('ruleList').addEventListener('click', function(e){
+  var a=e.target.closest('[data-apply]'), d=e.target.closest('[data-del]');
+  if(a) applyRule(rules[+a.dataset.apply]);
+  if(d){ rules.splice(+d.dataset.del,1); renderRules(); }
+});
+$('ruleList').addEventListener('change', function(e){ var s=e.target.closest('[data-on]'); if(s){ rules[+s.dataset.on].on=s.checked; renderRules(); } });
+function syncRuleVals(){ $('rBrightVal').textContent=$('rBright').value+'%'; $('rVolVal').textContent=$('rVol').value+'%'; }
+$('rBright').addEventListener('input', syncRuleVals); $('rVol').addEventListener('input', syncRuleVals); syncRuleVals();
+function addRule(time, bright, vol, days){
+  rules.push({time:time, bright:+bright, vol:+vol, days:days.map(Number), on:true});
+  rules.sort(function(a,b){ return a.time.localeCompare(b.time); }); renderRules();
+}
+$('rAdd').addEventListener('click', function(){
+  var days=Object.keys(selDays); if(!days.length){ toast('Выбери хотя бы один день недели'); return; }
+  addRule($('rTime').value||'22:00', $('rBright').value, $('rVol').value, days); toast('Правило добавлено');
+});
+$('rSample').addEventListener('click', function(){ addRule('22:00',30,20,[0,1,2,3,4,5,6]); toast('Пример добавлен: каждый день в 22:00 — яркость 30%, громкость 20%'); });
+renderRules(); setInterval(nowRule, 30000);
+
+/* звук: общий контекст */
+var AC=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+function beep(freq, dur, vol, type){ var a=ac(); if(!a) return; var o=a.createOscillator(), g=a.createGain();
+  o.type=type||'sine'; o.frequency.value=freq; g.gain.value=(vol==null?.3:vol)*.5;
+  g.gain.setValueAtTime(g.gain.value, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur); }
+
+/* ---------- СТЕНД ---------- */
+var benchHist = store('bench') || [];
+function drawBenchHist(){
+  $('benchHist').innerHTML = benchHist.length ? benchHist.slice().reverse().map(function(h){
+    return '<div class="kv"><span>'+h.date+'</span><b>'+h.total+' баллов · '+h.grade+'</b></div>'; }).join('')
+    : '<p class="note">Прогонов пока не было.</p>';
+}
+function stage(t){ $('benchStage').textContent=t; }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+function nextFrame(){ return new Promise(function(r){ requestAnimationFrame(r); }); }
+async function runBench(){
+  var btn=$('benchRun'); btn.disabled=true;
+  var res={};
+  stage('Этап 1/5 · целые числа: считаем 450 миллисекунд…'); await nextFrame();
+  var t0=performance.now(), n=0, acc=0;
+  while(performance.now()-t0<450){ for(var i=0;i<20000;i++){ acc+=(i*2654435761)>>>3; } n+=20000; }
+  res.cpu=Math.round(n/(performance.now()-t0)); /* тысяч операций в мс ~ млн/с */
+  stage('Этап 2/5 · дроби и тригонометрия…'); await nextFrame();
+  t0=performance.now(); n=0; var f=0;
+  while(performance.now()-t0<450){ for(var j=0;j<5000;j++){ f+=Math.sin(j*.001)*Math.cos(j*.002)+Math.sqrt(j+1); } n+=5000; }
+  res.math=Math.round(n/(performance.now()-t0));
+  stage('Этап 3/5 · память: пишем и читаем 64 МБ…'); await nextFrame();
+  t0=performance.now(); var buf=new Float64Array(8*1024*1024);
+  for(var k=0;k<buf.length;k++) buf[k]=k*.5;
+  var sum=0; for(var m=0;m<buf.length;m+=16) sum+=buf[m];
+  res.mem=Math.round(64/((performance.now()-t0)/1000)); /* МБ/с примерно */
+  stage('Этап 4/5 · кадры: рисуем частицы полторы секунды…'); await nextFrame();
+  res.fps = await fpsTest();
+  stage('Этап 5/5 · интерфейс: тысяча блоков на странице…'); await nextFrame();
+  t0=performance.now(); var holder=document.createElement('div');
+  holder.style.cssText='position:fixed;left:-9999px;top:0;width:600px';
+  for(var q=0;q<1000;q++){ var d=document.createElement('div'); d.textContent='GSYNK '+q; d.style.cssText='padding:2px;border:1px solid #333'; holder.appendChild(d); }
+  document.body.appendChild(holder); void holder.offsetHeight; res.dom=Math.max(1,Math.round(1000/((performance.now()-t0)/1000))); holder.remove();
+  /* нормировка к условным 100 — формула открыта и написана выше */
+  var sCpu=Math.min(100,res.cpu/2200), sMath=Math.min(100,res.math/600), sMem=Math.min(100,res.mem/20), sFps=Math.min(100,res.fps/1.2), sDom=Math.min(100,res.dom/600);
+  var total=Math.round((sCpu*4+sMath*3+sMem*2+sFps*2+sDom)/12*100);
+  var grade = total>=7500?'флагман':total>=5200?'быстрый':total>=3300?'середняк':total>=1800?'скромный':'старенький, но живой';
+  $('benchOut').innerHTML =
+    '<div class="out">'+total+' <small>баллов · класс устройства: '+grade+'</small></div>'+
+    '<div class="kv"><span>Целые числа</span><b>≈'+res.cpu.toLocaleString('ru-RU')+' оп./мс</b></div>'+
+    '<div class="kv"><span>Дроби и синусы</span><b>≈'+res.math.toLocaleString('ru-RU')+' оп./мс</b></div>'+
+    '<div class="kv"><span>Память (запись+чтение)</span><b>≈'+res.mem+' МБ/с</b></div>'+
+    '<div class="kv"><span>Кадры канваса с частицами</span><b>'+res.fps+' кадр/с</b></div>'+
+    '<div class="kv"><span>Интерфейс (1000 блоков)</span><b>≈'+res.dom+' блок/с</b></div>'+
+    '<p class="note">Контрольная сумма этапов: '+((acc+Math.round(f)+Math.round(sum))>>>0)+' — она не влияет на баллы, просто доказывает, что работа правда делалась.</p>';
+  benchHist.push({date:new Date().toLocaleString('ru-RU'), total:total, grade:grade});
+  if(benchHist.length>12) benchHist=benchHist.slice(-12);
+  store('bench', benchHist); drawBenchHist();
+  stage('Готово. В Android стенд считает семь этапов на настоящем железе и сравнивает с телефоном друга по связи.');
+  btn.disabled=false;
+}
+function fpsTest(){
+  return new Promise(function(resolve){
+    var c=$('benchCanvas'), x=c.getContext('2d'); var W=c.width,H=c.height;
+    var parts=[]; for(var i=0;i<140;i++) parts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,r:2+Math.random()*5,h:Math.random()*360});
+    var frames=0, start=performance.now();
+    function fr(){
+      x.fillStyle='rgba(10,8,23,.35)'; x.fillRect(0,0,W,H);
+      parts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
+        x.fillStyle='hsl('+p.h+',90%,65%)'; x.beginPath(); x.arc(p.x,p.y,p.r,0,7); x.fill(); });
+      frames++;
+      if(performance.now()-start<1500) requestAnimationFrame(fr); else resolve(Math.round(frames/((performance.now()-start)/1000)));
+    }
+    requestAnimationFrame(fr);
+  });
+}
+$('benchRun').addEventListener('click', runBench);
+$('benchClear').addEventListener('click', function(){ benchHist=[]; store('bench',benchHist); drawBenchHist(); });
+drawBenchHist();
+/* нагрузка воркерами */
+var workers=[];
+function stopLoad(){ workers.forEach(function(w){ w.terminate(); }); workers=[]; $('loadStop').disabled=true; $('loadRun').disabled=false; }
+$('loadStop').addEventListener('click', function(){ stopLoad(); stage('Нагрузка остановлена вручную.'); });
+$('loadRun').addEventListener('click', function(){
+  var cores=navigator.hardwareConcurrency||4;
+  var code='var s=Date.now(); while(Date.now()-s<6000){ Math.sqrt(Math.random()*1e9); } postMessage(1);';
+  var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
+  for(var i=0;i<cores;i++){ try{ workers.push(new Worker(url)); }catch(e){} }
+  if(!workers.length){ toast('Браузер не дал запустить фоновые потоки'); return; }
+  $('loadRun').disabled=true; $('loadStop').disabled=false;
+  stage('Нагрузка: занято потоков — '+workers.length+' (ядер сообщает браузер: '+cores+'). Сама остановится через 5 секунд.');
+  stoppers.push(stopLoad);
+  setTimeout(function(){ if(workers.length){ stopLoad(); stage('Нагрузка завершена по таймеру. Устройство могло заметно нагреться — так задумано.'); } }, 5200);
+});
+
+/* ---------- ЭХО-ЛИНЕЙКА (алгоритм перенесён из Echo.kt) ---------- */
+function soundSpeed(t){ return 331.3 + 0.606*t; }
+function findHit(env, rate, minDelayMs){
+  if(!env.length) return null;
+  var toIdx=function(ms){ return Math.max(0, Math.min(env.length-1, Math.round(rate*ms/1000))); };
+  var tail=Math.floor(env.length*3/4), s=0,c=0,i;
+  for(i=tail;i<env.length;i++){ s+=env[i]; c++; }
+  var floor=c? s/c:0, thr=Math.max(floor*2.2, 80);
+  /* опорный щелчок — пик прямого звука в первые 60 мс */
+  var win=toIdx(60), click=-1, peak=0;
+  for(i=0;i<=win;i++){ if(env[i]>peak){ peak=env[i]; click=i; } }
+  if(click<0||peak<thr) return null;
+  /* эхо ищем только после того, как сам щелчок затих, иначе его хвост примется за отражение */
+  var end=click; while(end<env.length && env[end]>=thr) end++;
+  var from=Math.max(end, Math.min(env.length-1, click+toIdx(minDelayMs||2)));
+  var echo=-1, best=thr;
+  for(i=from;i<env.length;i++){ if(env[i]>best){ best=env[i]; echo=i; } }
+  if(echo<0) return null;
+  return {click:click, echo:echo, delayMs:Math.max(1, Math.round((echo-click)*1000/rate))};
+}
+function echoSync(){
+  var t=+$('eTemp').value, sp=soundSpeed(t);
+  $('eTempVal').textContent=t+' °C';
+  $('eSpeed').textContent=sp.toFixed(1).replace('.',',')+' м/с';
+  $('eCmMs').textContent=(sp/20).toFixed(2).replace('.',',')+' см';
+  $('eDistVal').textContent=$('eDist').value+' см';
+}
+$('eTemp').addEventListener('input', echoSync); $('eDist').addEventListener('input', echoSync); echoSync();
+function echoShoot(){
+  beep(3200, .03, .5, 'square');
+  var t=+$('eTemp').value, sp=soundSpeed(t), cmMs=sp/20;
+  var dist=+$('eDist').value;
+  var SR=44100, N=Math.round(SR*.2), raw=new Float32Array(N), i;
+  var clickAt=Math.round(SR*(0.005+Math.random()*0.01));
+  var delayMs=dist/cmMs, echoAt=clickAt+Math.round(SR*delayMs/1000);
+  function burst(at, amp){ var len=Math.round(SR*.0015); for(var j=0;j<len;j++){ var idx=at+j; if(idx<N) raw[idx]+=amp*Math.sin(j*.9)*(1-j/len); } }
+  for(i=0;i<N;i++) raw[i]=(Math.random()-.5)*180;
+  burst(clickAt, 22000);
+  burst(echoAt, Math.max(900, 9000*(120/Math.max(60,dist))));
+  /* огибающая окнами по 16 отсчётов, как envelope() в приложении */
+  var W=16, env=[];
+  for(i=0;i<N;i+=W){ var mx=0; for(var k=0;k<W&&i+k<N;k++) mx=Math.max(mx, Math.abs(raw[i+k])); env.push(mx); }
+  var rate=SR/W, hit=findHit(env, rate, 2);
+  drawEcho(env, hit, rate);
+  if(!hit){ $('eOut').innerHTML='<span class="warn">Эхо не нашлось: стена слишком близко, далеко или поглотила звук. Приложение в такой ситуации показывает именно это, а не придуманную цифру.</span>'; return; }
+  var found=hit.delayMs*cmMs, err=Math.abs(found-dist)/dist*100;
+  $('eOut').innerHTML='<div class="out">'+found.toFixed(0)+' см <small>нашлось эхо · задержка '+hit.delayMs+' мс</small></div>'+
+    '<div class="kv"><span>Настоящее расстояние</span><b>'+dist+' см</b></div>'+
+    '<div class="kv"><span>Расхождение</span><b>'+err.toFixed(1).replace('.',',')+'%</b></div>'+
+    '<div class="kv"><span>Без учёта температуры было бы</span><b>'+(hit.delayMs*17.17).toFixed(0)+' см</b></div>'+
+    '<p class="note">На графике: первый горб — сам щелчок (точка отсчёта), второй — отражение. Задержка динамика поэтому вычитается автоматически.</p>';
+}
+function drawEcho(env, hit, rate){
+  var c=$('eCanvas'), x=c.getContext('2d'), W=c.width,H=c.height;
+  x.clearRect(0,0,W,H); x.strokeStyle='#262140'; x.fillStyle='#8e86a8'; x.font='20px sans-serif';
+  for(var ms=0;ms<=200;ms+=25){ var px=ms/200*W; x.beginPath(); x.moveTo(px,0); x.lineTo(px,H); x.stroke(); x.fillText(ms+' мс', px+4, 22); }
+  var peak=0; env.forEach(function(v){ peak=Math.max(peak,v); });
+  x.strokeStyle='#22d3ee'; x.lineWidth=2; x.beginPath();
+  env.forEach(function(v,i){ var px=i/env.length*W, py=H-8-(v/peak)*(H-46); if(i===0)x.moveTo(px,py); else x.lineTo(px,py); });
+  x.stroke();
+  if(hit){
+    [{i:hit.click,c:'#fbbf24',t:'щелчок'},{i:hit.echo,c:'#34d399',t:'эхо'}].forEach(function(m){
+      var px=m.i/env.length*W; x.strokeStyle=m.c; x.beginPath(); x.moveTo(px,26); x.lineTo(px,H); x.stroke();
+      x.fillStyle=m.c; x.fillText(m.t, Math.min(W-90,px+5), 48);
+    });
+  }
+}
+$('eShoot').addEventListener('click', echoShoot);
+$('eRandom').addEventListener('click', function(){ $('eDist').value=40+Math.round(Math.random()*360); echoSync(); echoShoot(); });
+
+/* ---------- ГЛАЗА ---------- */
+var pxPerMm=324/85.6;
+function calSync(){ var w=+$('calRange').value; $('cardCal').style.width=w+'px'; pxPerMm=w/85.6; $('pxMm').textContent=pxPerMm.toFixed(2).replace('.',','); }
+$('calRange').addEventListener('input', calSync); calSync();
+$('eyeDist').addEventListener('input', function(){ $('eyeDistVal').textContent=$('eyeDist').value+' см'; drawLandolt(); });
+var LINES=[0.1,0.2,0.3,0.4,0.5,0.6,0.8,1.0,1.2,1.5];
+var eye={li:4, dir:0, count:0, best:0, last:-1};
+function optoPx(){
+  var dMm=+$('eyeDist').value*10, ac=LINES[eye.li];
+  /* знак целиком — 5 угловых минут, половина угла: (2,5/ac) минут -> градусы -> радианы */
+  var mm=2*dMm*Math.tan((2.5/ac)/60*Math.PI/180);
+  return {px:mm*pxPerMm, mm:mm};
+}
+function drawLandolt(){
+  var sizes=optoPx(), px=Math.max(4, Math.min(190, sizes.px));
+  var dirs=[0,90,180,270], d;
+  do { d=dirs[Math.floor(Math.random()*4)]; } while(d===eye.last);
+  eye.dir=d; eye.last=d;
+  var R=px/2, sw=Math.max(1.2, px/5);
+  var gapLen=2*Math.PI*R/5, rest=2*Math.PI*R-gapLen;
+  $('landoltSvg').innerHTML='<circle cx="120" cy="120" r="'+R+'" fill="none" stroke="#f6f4ff" stroke-width="'+sw+'"'+
+    ' stroke-dasharray="'+rest+' '+gapLen+'" transform="rotate('+((d+36)%360)+' 120 120)"/>';
+  $('eyeLine').textContent=String(LINES[eye.li]).replace('.',',')+' · знак '+sizes.mm.toFixed(2).replace('.',',')+' мм ('+sizes.px.toFixed(1).replace('.',',')+' px)';
+  if(sizes.px<2) $('eyeNote').textContent='Честное предупреждение приложения: эта строка на твоём экране мельче пары пикселей — отодвинься или увеличь дистанцию в настройке.';
+}
+$('dirs').addEventListener('click', function(e){
+  var b=e.target.closest('[data-d]'); if(!b) return;
+  var ok=(+b.dataset.d)===eye.dir;
+  eye.count++;
+  if(ok){ eye.best=Math.max(eye.best, LINES[eye.li]); if(eye.li<LINES.length-1) eye.li++; }
+  else if(eye.li>0) eye.li--;
+  $('eyeCount').textContent=eye.count+' / 12';
+  $('eyeBest').textContent=eye.best? String(eye.best).replace('.',',') : '—';
+  $('eyeNote').textContent= ok? 'Верно — строка мельче.' : 'Не туда — строка крупнее.';
+  if(eye.count>=12){ $('eyeNote').textContent='Готово: лучшая уверенно прочитанная строка — '+String(eye.best).replace('.',',')+'. Это грубая проверка экрана, а не таблица у врача.'; eye.count=0; eye.li=4; }
+  drawLandolt();
+});
+$('eyeStart').addEventListener('click', function(){ eye={li:4,dir:0,count:0,best:0,last:-1}; $('eyeCount').textContent='0 / 12'; $('eyeBest').textContent='—'; drawLandolt(); });
+drawLandolt();
+/* пластины */
+var plate={num:0, ok:0, total:0};
+function drawPlate(){
+  plate.num=12+Math.floor(Math.random()*88);
+  var c=$('plateCanvas'), x=c.getContext('2d'), W=c.width,H=c.height;
+  var mask=document.createElement('canvas'); mask.width=W; mask.height=H;
+  var mx=mask.getContext('2d'); mx.fillStyle='#000'; mx.fillRect(0,0,W,H);
+  mx.fillStyle='#fff'; mx.font='700 250px "Segoe UI",Arial'; mx.textAlign='center'; mx.textBaseline='middle';
+  mx.fillText(String(plate.num), W/2, H/2+8);
+  var md=mx.getImageData(0,0,W,H).data;
+  var hard=$('plateHard').checked;
+  var inCols= hard? ['#b5654d','#c47a52','#a85538','#bd6f57'] : ['#d3543a','#c0392b','#e67e5a','#ba4a36'];
+  var outCols= hard? ['#7d8c4f','#8a9a58','#71804a','#86955a'] : ['#5d8a4a','#6fae56','#4c7a3e','#7cb85e'];
+  x.fillStyle='#141414'; x.fillRect(0,0,W,H);
+  for(var i=0;i<2600;i++){
+    var a=Math.random()*Math.PI*2, rr=Math.sqrt(Math.random())*(W/2-8);
+    var px=W/2+Math.cos(a)*rr, py=H/2+Math.sin(a)*rr;
+    var inside=md[(Math.round(py)*W+Math.round(px))*4]>120;
+    var cols=inside? inCols:outCols;
+    x.fillStyle=cols[Math.floor(Math.random()*cols.length)];
+    x.beginPath(); x.arc(px,py,3.5+Math.random()*5.5,0,7); x.fill();
+  }
+}
+$('plateNew').addEventListener('click', drawPlate);
+$('plateHard').addEventListener('change', drawPlate);
+$('plateCheck').addEventListener('click', function(){
+  var g=parseInt($('plateGuess').value,10); plate.total++;
+  if(g===plate.num){ plate.ok++; $('plateNote').textContent='Верно, это '+plate.num+'.'; }
+  else $('plateNote').textContent='Было '+plate.num+', а не '+(isNaN(g)?'пусто':g)+'. Экран светится сам, поэтому настоящие пластины печатают на бумаге — это проверка «на себя», не диагноз.';
+  $('plateScore').textContent=plate.ok+' из '+plate.total;
+  $('plateGuess').value=''; drawPlate();
+});
+drawPlate();
+
+/* ---------- ПУЛЬС ---------- */
+var pulse={stream:null, running:false, samples:[], times:[]};
+function pStop(){
+  pulse.running=false;
+  if(pulse.stream){ pulse.stream.getTracks().forEach(function(t){ t.stop(); }); pulse.stream=null; }
+  $('pStop').disabled=true; $('pStart').disabled=false;
+}
+function bpmAnalyse(vals, fps){
+  if(vals.length<60||!fps) return {bpm:null,note:'слишком мало кадров для разбора'};
+  function smooth(a,w){ var o=[],i,j,s,c; for(i=0;i<a.length;i++){ s=0;c=0; for(j=-w;j<=w;j++){ var k=i+j; if(k>=0&&k<a.length){ s+=a[k]; c++; } } o.push(s/c); } return o; }
+  var a=smooth(vals,2);
+  var win=Math.max(5, Math.round(fps*1.3)), trend=smooth(a, Math.floor(win/2));
+  var d=a.map(function(v,i){ return v-trend[i]; }); d=smooth(d,1);
+  var mean=0; d.forEach(function(v){ mean+=v; }); mean/=d.length;
+  var energy=0; d=d.map(function(v){ var u=v-mean; energy+=u*u; return u; });
+  if(energy<d.length*0.000001) return {bpm:null,note:'сигнал плоский: палец не закрывает камеру или темно'};
+  var minLag=Math.floor(fps*60/190), maxLag=Math.ceil(fps*60/40), best=-1, bestLag=0;
+  for(var lag=minLag;lag<=maxLag&&lag<d.length-10;lag++){
+    var s2=0; for(var i2=0;i2+lag<d.length;i2++) s2+=d[i2]*d[i2+lag];
+    var corr=s2/energy;
+    if(corr>best){ best=corr; bestLag=lag; }
+  }
+  if(best<0.12) return {bpm:null,quality:best,note:'волна не похожа сама на себя ни на одном сдвиге: рука дрожала или палец сполз — повтори неподвижно'};
+  return {bpm:Math.round(fps*60/bestLag), quality:best, note: best>0.35? 'сигнал чистый' : 'сигнал шумноват, число ориентировочное'};
+}
+function pDraw(){
+  var c=$('pCanvas'),x=c.getContext('2d'),W=c.width,H=c.height, v=pulse.samples.slice(-320);
+  x.clearRect(0,0,W,H); x.strokeStyle='#262140'; for(var gx=0;gx<W;gx+=60){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,H); x.stroke(); }
+  if(v.length<2) return;
+  var mn=Math.min.apply(null,v), mx2=Math.max.apply(null,v), rg=Math.max(1,mx2-mn);
+  x.strokeStyle='#f472b6'; x.lineWidth=2.5; x.beginPath();
+  v.forEach(function(val,i){ var px=i/(319)*W, py=H-16-((val-mn)/rg)*(H-32); if(i===0)x.moveTo(px,py); else x.lineTo(px,py); });
+  x.stroke();
+}
+function pFinish(demo){
+  var dur=(pulse.times[pulse.times.length-1]-pulse.times[0])/1000;
+  var fps=pulse.samples.length/Math.max(.1,dur);
+  var r=bpmAnalyse(pulse.samples, fps);
+  pStop();
+  if(r.bpm){
+    var verdict= r.bpm<50?'очень спокойно для бодрствования':r.bpm<60?'спокойный ритм':r.bpm<=90?'обычный ритм покоя':r.bpm<=110?'учащённо — движение, волнение или кофе':'быстро; если это не после нагрузки — проверь настоящим прибором';
+    $('pOut').innerHTML='<div class="out">'+r.bpm+' <small>уд/мин'+(demo?' · демо-волна, не настоящий замер':'')+'</small></div>'+
+      '<div class="kv"><span>Качество автокорреляции</span><b>'+r.quality.toFixed(2).replace('.',',')+'</b></div>'+
+      '<div class="kv"><span>Кадров в секунду</span><b>'+fps.toFixed(1).replace('.',',')+'</b></div>'+
+      '<div class="kv"><span>Вывод</span><b>'+verdict+'</b></div>'+
+      '<p class="note">Это ориентир, а не медицинский прибор. В Android-версии автоэкспозиция камеры отключается принудительно, поэтому волна чище.</p>';
+  } else {
+    $('pOut').innerHTML='<span class="warn">Не удалось разобрать пульс: '+r.note+'.</span> <span class="note">Приложение в такой ситуации показывает именно отказ, а не придуманное число — и сайт тоже.</span>';
+  }
+}
+$('pStart').addEventListener('click', function(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast('Этот браузер не даёт камеру странице'); return; }
+  pulse.samples=[]; pulse.times=[];
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false}).then(function(stream){
+    pulse.stream=stream; pulse.running=true; $('pStart').disabled=true; $('pStop').disabled=false;
+    stoppers.push(pStop);
+    var video=$('pVideo'); video.srcObject=stream; video.play().catch(function(){});
+    var sc=document.createElement('canvas'); sc.width=40; sc.height=40; var sx=sc.getContext('2d',{willReadFrequently:true});
+    var start=null;
+    $('pOut').innerHTML='<span class="note">Идёт замер: держи палец неподвижно и не дави слишком сильно…</span>';
+    function fr(ts){
+      if(!pulse.running) return;
+      if(start===null) start=ts;
+      if(video.readyState>=2){
+        var vw=video.videoWidth,vh=video.videoHeight, s2=Math.min(vw,vh)*.4;
+        sx.drawImage(video,(vw-s2)/2,(vh-s2)/2,s2,s2,0,0,40,40);
+        var d=sx.getImageData(0,0,40,40).data, sr=0,n=0;
+        for(var i=0;i<d.length;i+=4){ sr+=d[i]; n++; }
+        pulse.samples.push(sr/n); pulse.times.push(ts); pDraw();
+      }
+      if(ts-start<15000) requestAnimationFrame(fr); else pFinish(false);
+    }
+    requestAnimationFrame(fr);
+  }).catch(function(){ $('pOut').innerHTML='<span class="warn">Камера не дала доступ.</span> <span class="note">Можно посмотреть демо-волну кнопкой ниже — она разбирается тем же алгоритмом, но это не замер.</span>'; });
+});
+$('pStop').addEventListener('click', function(){ pStop(); $('pOut').innerHTML='<span class="note">Замер остановлен. Набрано кадров: '+pulse.samples.length+'.</span>'; });
+$('pDemo').addEventListener('click', function(){
+  pulse.samples=[]; pulse.times=[]; var fps=30;
+  for(var i=0;i<fps*15;i++){ var t=i/fps;
+    pulse.samples.push(140 + 9*Math.sin(2*Math.PI*1.2*t) + 3*Math.sin(2*Math.PI*2.4*t+1) + (Math.random()-.5)*2.4 + t*.35);
+    pulse.times.push(i*1000/fps);
+  }
+  pDraw(); pFinish(true);
+});
+
+/* ---------- ТОН ---------- */
+function tFreq(){ var v=+$('tFreq').value/1000; return Math.round(50*Math.pow(12000/50, v)); }
+function tSync(){ $('tFreqVal').textContent=tFreq()+' Гц'; $('tVolVal').textContent=$('tVol').value+'%'; }
+$('tFreq').addEventListener('input', tSync); $('tVol').addEventListener('input', tSync); tSync();
+var toneOsc=null, toneGain=null;
+function toneStart(freq){
+  var a=ac(); if(!a) return; toneStop();
+  toneOsc=a.createOscillator(); toneGain=a.createGain();
+  toneOsc.type=$('tWave').value; toneOsc.frequency.value=freq||tFreq();
+  toneGain.gain.value=(+$('tVol').value/100)*(toneOsc.type==='square'||toneOsc.type==='sawtooth'?.12:.4);
+  toneOsc.connect(toneGain); toneGain.connect(a.destination); toneOsc.start();
+}
+function toneStop(){ if(toneOsc){ try{ toneOsc.stop(); }catch(e){} toneOsc=null; } }
+stoppers.push(toneStop);
+var hold=$('tHold');
+hold.addEventListener('pointerdown', function(e){ e.preventDefault(); toneStart(); });
+['pointerup','pointerleave','pointercancel'].forEach(function(ev){ hold.addEventListener(ev, toneStop); });
+$('t440').addEventListener('click', function(){ $('tFreq').value=Math.round(Math.log(440/50)/Math.log(12000/50)*1000); tSync(); beep(440,1,+$('tVol').value/100); });
+$('tSweep').addEventListener('click', function(){
+  var a=ac(); if(!a) return; toneStart(60);
+  toneOsc.frequency.setValueAtTime(60, a.currentTime);
+  toneOsc.frequency.exponentialRampToValueAtTime(12000, a.currentTime+2.4);
+  setTimeout(toneStop, 2500);
+});
+$('tStopAll').addEventListener('click', toneStop);
+var NOTES=[['до',261.63],['ре',293.66],['ми',329.63],['фа',349.23],['соль',392.00],['ля',440.00],['си',493.88],['до′',523.25]];
+$('noteBtns').innerHTML=NOTES.map(function(n,i){ return '<button type="button" class="btn ghost small" data-note="'+i+'">'+n[0]+'</button>'; }).join('');
+$('noteBtns').addEventListener('click', function(e){ var b=e.target.closest('[data-note]'); if(!b) return; var n=NOTES[+b.dataset.note]; beep(n[1],.7,+$('tVol').value/100); $('tNoteInfo').textContent=n[0]+' — '+n[1].toFixed(2).replace('.',',')+' Гц.'; });
+$('tMelody').addEventListener('click', function(){
+  var seq=[0,2,4,5,4,2,1,2,0]; var vol=+$('tVol').value/100;
+  seq.forEach(function(idx,i){ setTimeout(function(){ beep(NOTES[idx][1], .42, vol); }, i*300); });
+});
+
+/* ---------- СВЕТ и МОРЗЯНКА ---------- */
+var light={color:'#ffffff', strobe:null, morseTimers:[]};
+var LCOLORS=[['#ffffff','белый'],['#ffe3b3','тёплый'],['#ffd6d6','розовый'],['#d6f5ff','холодный'],['#ff3b30','красный']];
+$('lightColors').innerHTML=LCOLORS.map(function(c){ return '<button type="button" class="chip" data-c="'+c[0]+'">'+c[1]+'</button>'; }).join('');
+function setLight(){ var b=+$('lBright').value/100; $('lightPanel').style.background=light.color; $('lightPanel').style.filter='brightness('+(0.15+b*0.85)+')'; $('lBrightVal').textContent=$('lBright').value+'%'; }
+$('lightColors').addEventListener('click', function(e){ var b=e.target.closest('[data-c]'); if(b){ light.color=b.dataset.c; setLight(); } });
+$('lBright').addEventListener('input', setLight); setLight();
+$('lFull').addEventListener('click', function(){ var p=$('lightPanel'); if(p.requestFullscreen) p.requestFullscreen().catch(function(){}); });
+function stopStrobe(){ if(light.strobe){ clearInterval(light.strobe); light.strobe=null; $('lStrobe').textContent='Включить строб'; $('lightPanel').style.visibility='visible'; } }
+$('lStrobe').addEventListener('click', function(){
+  if(light.strobe){ stopStrobe(); return; }
+  var hz=+$('lHz').value, on=false;
+  light.strobe=setInterval(function(){ on=!on; $('lightPanel').style.visibility= on? 'visible':'hidden'; }, Math.round(500/hz));
+  $('lStrobe').textContent='Выключить строб'; stoppers.push(stopStrobe);
+});
+$('lHz').addEventListener('input', function(){ $('lHzVal').textContent=$('lHz').value+' Гц'; if(light.strobe){ stopStrobe(); $('lStrobe').click(); } });
+var MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.'};
+function morseOf(text){ return text.toUpperCase().split('').map(function(ch){ return ch===' '? '/' : (MORSE[ch]||''); }).join(' '); }
+function morseSync(){ $('morseCode').textContent=morseOf($('morseText').value)||'—'; }
+$('morseText').addEventListener('input', morseSync); morseSync();
+function morseStop(){ light.morseTimers.forEach(clearTimeout); light.morseTimers=[]; $('lightPanel').style.visibility='visible'; if(navigator.vibrate) navigator.vibrate(0); }
+$('morseStop').addEventListener('click', morseStop);
+$('morsePlay').addEventListener('click', function(){
+  morseStop(); stopStrobe();
+  var code=morseOf($('morseText').value), unit=140, time=0, vib=[];
+  code.split('').forEach(function(sym){
+    if(sym==='.'||sym==='-'){ var len=sym==='.'? unit: unit*3;
+      (function(at,ln){ light.morseTimers.push(setTimeout(function(){ $('lightPanel').style.visibility='visible'; }, at));
+        light.morseTimers.push(setTimeout(function(){ $('lightPanel').style.visibility='hidden'; }, at+ln)); })(time,len);
+      vib.push(len, unit); time+=len+unit;
+    } else if(sym===' '){ time+=unit*2; vib.push(unit*2); }
+    else if(sym==='/'){ time+=unit*4; vib.push(unit*4); }
+  });
+  light.morseTimers.push(setTimeout(function(){ $('lightPanel').style.visibility='visible'; }, time+100));
+  if(navigator.vibrate) navigator.vibrate(vib);
+  stoppers.push(morseStop);
+});
+
+/* ---------- УСТРОЙСТВО ---------- */
+(function(){
+  var rows=[];
+  function row(k,v){ rows.push('<div class="kv"><span>'+k+'</span><b style="text-align:right;word-break:break-word">'+v+'</b></div>'); }
+  row('Ядер сообщает браузер', navigator.hardwareConcurrency||'не сообщает');
+  row('Память устройства', navigator.deviceMemory? '≈ '+navigator.deviceMemory+' ГБ (браузер округляет)' : 'браузер не сообщает');
+  row('Экран', screen.width+' × '+screen.height+' · плотность '+window.devicePixelRatio);
+  row('Язык', navigator.language||'—');
+  row('Касаний одновременно', navigator.maxTouchPoints);
+  row('Сеть', navigator.onLine? 'в сети':'офлайн');
+  if(navigator.connection) row('Тип соединения', navigator.connection.effectiveType||'—');
+  row('Часовой пояс', (Intl.DateTimeFormat().resolvedOptions().timeZone)||'—');
+  row('Браузер', navigator.userAgent);
+  $('devInfo').innerHTML=rows.join('');
+  if(navigator.getBattery) navigator.getBattery().then(function(b){
+    $('devInfo').innerHTML += '<div class="kv"><span>Заряд батареи</span><b id="devBat">'+Math.round(b.level*100)+'%</b></div>';
+    b.addEventListener('levelchange', function(){ var el=$('devBat'); if(el) el.textContent=Math.round(b.level*100)+'%'; });
+  }).catch(function(){});
+})();
+$('compassBtn').addEventListener('click', function(){
+  function listen(){
+    addEventListener('deviceorientation', function(e){
+      if(e.alpha==null){ $('compassOut').textContent='датчик молчит'; return; }
+      var dir=['север','северо-восток','восток','юго-восток','юг','юго-запад','запад','северо-запад'][Math.round(((360-e.alpha)%360)/45)%8];
+      $('compassOut').textContent=Math.round((360-e.alpha)%360)+'° · '+dir;
+    });
+    toast('Компас слушает датчик поворота. На компьютере данных обычно нет — нужен телефон.');
+  }
+  if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(function(r){ if(r==='granted') listen(); else toast('Доступ к датчику запрещён'); }).catch(function(){});
+  } else listen();
+});
+$('encBtn').addEventListener('click', function(){
+  try{ $('coderOut').textContent=btoa(String.fromCharCode.apply(null, new TextEncoder().encode($('coderIn').value))); }
+  catch(e){ $('coderOut').textContent='Не получилось закодировать.'; }
+});
+$('decBtn').addEventListener('click', function(){
+  try{ var bin=atob($('coderIn').value.trim()); var bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    $('coderOut').textContent=new TextDecoder().decode(bytes);
+  }catch(e){ $('coderOut').textContent='Это не похоже на Base64.'; }
+});
+$('passLen').addEventListener('input', function(){ $('passLenVal').textContent=$('passLen').value; });
+$('passBtn').addEventListener('click', function(){
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%*+-_'; var n=+$('passLen').value;
+  var buf=new Uint32Array(n); crypto.getRandomValues(buf); var out='';
+  for(var i=0;i<n;i++) out+=chars[buf[i]%chars.length];
+  $('passOut').textContent=out;
+});
+
+/* ---------- КАЖДЫЙ ДЕНЬ ---------- */
+function seeded(arr, seed){ var x=0; for(var i=0;i<seed.length;i++) x=(x*31+seed.charCodeAt(i))>>>0; return arr[x%arr.length]; }
+var FACTS=[
+  'Скорость звука растёт на 0,606 м/с с каждым градусом — эхо-линейка GSYNK учитывает это честно.',
+  'Плитки GSYNK квадратные принципиально: это сетка Metro из Windows 8, а островок наоборот — максимально круглый.',
+  'Островок GSYNK не перехватывает касания: окно специально помечено «не для пальца», чтобы не мешать экрану под ним.',
+  'Строка зрения 1,0 на расстоянии 40 см — это кольцо высотой всего 0,58 мм. Поэтому в проверке глаз важна калибровка экрана.',
+  'Обновления GSYNK качаются с продолжением после обрыва и проверяются по SHA-256, а проверка раз в минуту почти не тратит лимит GitHub из-за ETag.',
+  'NFC в Grape Link — только знакомство: настоящая игра на два телефона идёт уже по Wi-Fi, мир считает телефон хозяина.',
+  'Автоэкспозиция камеры стирает волну пульса, поэтому пульсометр GSYNK отключает её и ставит выдержку вручную.',
+  'В GSYNK 22 пасхалки, и все открываются за настоящие действия — например, за первый замер на стенде или первое касание NFC.'
+];
+(function(){
+  var today=new Date().toISOString().slice(0,10);
+  var y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  var st=store('streak')||{last:'', n:0};
+  if(st.last!==today){ st.n = (st.last===y)? st.n+1 : 1; st.last=today; store('streak', st); }
+  $('streak').textContent=st.n+' дн. подряд (в приложении за 3, 7, 14 и 30 дней дают подарки)';
+  var t=seeded(TILES, today);
+  $('dailyFn').textContent=t.title+' — '+t.sub;
+  $('dailyFact').textContent=seeded(FACTS, 'fact'+today);
+  var open=$('dailyOpen');
+  if(WEB[t.id]) open.href='#/'+WEB[t.id]; else { open.href='#/home'; open.textContent='Найти её в каталоге (живёт в APK)'; }
+  $('roulette').addEventListener('click', function(){
+    var out=$('rouletteOut'), n=0;
+    var iv=setInterval(function(){ var r=TILES[Math.floor(Math.random()*TILES.length)]; out.textContent=r.title+'…';
+      if(++n>15){ clearInterval(iv); out.innerHTML='Выпало: <b>'+r.title+'</b> — '+r.sub+(WEB[r.id]? ' · <a href="#/'+WEB[r.id]+'">открыть</a>' : ' · живёт в Android APK'); }
+    }, 70);
+  });
+  var clicks=0;
+  $('eggIcon').addEventListener('click', function(){
+    if(++clicks<5) return; clicks=0;
+    var eggs=(store('eggs')||0)+1; store('eggs', eggs); $('eggCount').textContent=eggs;
+    toast('Пасхалка! Виноградный салют баловства ради. В приложении их 22 — и все за дела.');
+    for(var i=0;i<22;i++){ var s=document.createElement('span');
+      s.style.cssText='position:fixed;z-index:80;border-radius:50%;pointer-events:none;left:70%;top:40%;width:'+(7+Math.random()*9)+'px;height:'+(7+Math.random()*9)+'px;background:'+['#8b5cf6','#a855f7','#7c3aed','#34d399'][i%4];
+      document.body.appendChild(s);
+      var dx=(Math.random()-.5)*440, dy=140+Math.random()*340;
+      s.animate([{transform:'translate(0,0)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px)',opacity:0}],{duration:1200+Math.random()*600}).onfinish=(function(el){ return function(){ el.remove(); }; })(s);
+    }
+  });
+  $('eggCount').textContent=store('eggs')||0;
+})();
+
+route();
+/* остановка всего живого при уходе с раздела обрабатывается через stoppers в route() */
+addEventListener('hashchange', function(){ stopStrobe(); morseStop(); toneStop(); pStop(); });
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>
